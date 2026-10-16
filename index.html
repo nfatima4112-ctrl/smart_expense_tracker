@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#6558e8" />
+  <title>Smart Expense Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" aria-label="Smart Expense Tracker home">
+        <span class="brand-icon">↗</span>
+        <span>SpendSmart<small>PERSONAL FINANCE</small></span>
+      </a>
+      <nav class="nav">
+        <a class="nav-link active" href="#dashboard"><span>▦</span> Dashboard</a>
+        <a class="nav-link" href="#transactions"><span>↔</span> Transactions</a>
+        <a class="nav-link" href="#budgets"><span>◎</span> Budgets</a>
+        <a class="nav-link" href="#insights"><span>▥</span> Insights</a>
+      </nav>
+      <div class="sidebar-tip">
+        <div class="tip-icon">✦</div>
+        <strong>Small steps add up.</strong>
+        <p>Keep tracking your money to make more confident financial decisions.</p>
+      </div>
+      <div class="sidebar-footer"><span class="status-dot"></span> Your data stays on this device</div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="menu-button" id="menuButton" aria-label="Toggle navigation">☰</button>
+        <div>
+          <p class="eyebrow" id="todayLabel">PERSONAL FINANCE</p>
+          <h1>Dashboard</h1>
+        </div>
+        <div class="topbar-actions">
+          <button class="button button-ghost" id="exportButton">↓ Export CSV</button>
+          <button class="button button-primary" id="addTopButton">＋ Add transaction</button>
+        </div>
+      </header>
+
+      <section id="dashboard">
+        <div class="welcome-row">
+          <div>
+            <h2>Good to see you! <span class="wave">✦</span></h2>
+            <p>Here’s a clear picture of your money today.</p>
+          </div>
+          <label class="month-picker">Period
+            <input type="month" id="monthFilter" />
+          </label>
+        </div>
+
+        <div class="summary-grid">
+          <article class="summary-card balance-card">
+            <div class="card-heading"><span>Net balance</span><span class="metric-icon purple">↗</span></div>
+            <p class="metric-value" id="balanceValue">PKR 0</p>
+            <p class="metric-foot">Income minus expenses</p>
+            <div class="balance-decoration">✦</div>
+          </article>
+          <article class="summary-card">
+            <div class="card-heading"><span>Total income</span><span class="metric-icon green">↓</span></div>
+            <p class="metric-value" id="incomeValue">PKR 0</p>
+            <p class="metric-foot"><span class="positive">●</span> Money coming in</p>
+          </article>
+          <article class="summary-card">
+            <div class="card-heading"><span>Total expenses</span><span class="metric-icon orange">↑</span></div>
+            <p class="metric-value" id="expenseValue">PKR 0</p>
+            <p class="metric-foot"><span class="negative">●</span> Money going out</p>
+          </article>
+          <article class="summary-card">
+            <div class="card-heading"><span>Savings rate</span><span class="metric-icon blue">％</span></div>
+            <p class="metric-value" id="savingsValue">0%</p>
+            <p class="metric-foot">Of your income retained</p>
+          </article>
+        </div>
+
+        <div class="content-grid">
+          <section class="panel chart-panel" id="insights">
+            <div class="panel-heading">
+              <div><h3>Spending overview</h3><p>Where your money goes this month</p></div>
+              <span class="pill">By category</span>
+            </div>
+            <div class="chart-wrap"><canvas id="spendingChart" aria-label="Expenses by category chart"></canvas></div>
+            <div class="legend-note" id="chartEmpty">Add some expenses to see your spending breakdown.</div>
+          </section>
+          <section class="panel budget-panel" id="budgets">
+            <div class="panel-heading">
+              <div><h3>Monthly budgets</h3><p>Keep your spending on track</p></div>
+              <button class="text-button" id="manageBudgetsButton">Manage</button>
+            </div>
+            <div id="budgetList" class="budget-list"></div>
+          </section>
+        </div>
+
+        <section class="panel transactions-panel" id="transactions">
+          <div class="panel-heading transaction-heading">
+            <div><h3>Recent transactions</h3><p>Your latest money activity</p></div>
+            <div class="transaction-tools">
+              <input type="search" id="searchInput" placeholder="Search transactions..." aria-label="Search transactions" />
+              <select id="typeFilter" aria-label="Filter by transaction type">
+                <option value="all">All types</option><option value="expense">Expenses</option><option value="income">Income</option>
+              </select>
+              <button class="button button-small button-primary" id="addTransactionButton">＋ Add new</button>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>TRANSACTION</th><th>CATEGORY</th><th>DATE</th><th>AMOUNT</th><th>TYPE</th><th></th></tr></thead>
+              <tbody id="transactionRows"></tbody>
+            </table>
+            <div class="empty-state hidden" id="emptyState"><span>↔</span><strong>No transactions found</strong><p>Add a transaction or change your filters.</p></div>
+          </div>
+        </section>
+
+        <footer class="page-footer">SpendSmart · Simple habits, smarter money decisions.</footer>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="transactionModal">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-heading"><div><p class="eyebrow">YOUR MONEY, YOUR PLAN</p><h2 id="modalTitle">Add transaction</h2></div><button class="close-button" id="closeModal" aria-label="Close">×</button></div>
+      <form id="transactionForm">
+        <input type="hidden" id="transactionId" />
+        <div class="type-switch">
+          <label><input type="radio" name="transactionType" value="expense" checked /><span>− Expense</span></label>
+          <label><input type="radio" name="transactionType" value="income" /><span>＋ Income</span></label>
+        </div>
+        <label class="form-field">Description<input id="description" type="text" maxlength="80" placeholder="e.g. Grocery shopping" required /></label>
+        <div class="form-row">
+          <label class="form-field">Amount (PKR)<input id="amount" type="number" min="1" step="0.01" placeholder="2500" required /></label>
+          <label class="form-field">Category<select id="category" required></select></label>
+        </div>
+        <label class="form-field">Date<input id="transactionDate" type="date" required /></label>
+        <label class="form-field">Note (optional)<textarea id="note" rows="2" maxlength="250" placeholder="Add a short note..."></textarea></label>
+        <p class="form-error hidden" id="formError"></p>
+        <div class="modal-actions"><button type="button" class="button button-ghost" id="cancelModal">Cancel</button><button type="submit" class="button button-primary">Save transaction</button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-backdrop hidden" id="budgetModal">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="budgetModalTitle">
+      <div class="modal-heading"><div><p class="eyebrow">PLAN AHEAD</p><h2 id="budgetModalTitle">Manage monthly budgets</h2></div><button class="close-button" id="closeBudgetModal" aria-label="Close">×</button></div>
+      <p class="modal-description">Set a monthly spending limit for each category. Budgets are stored on this device.</p>
+      <form id="budgetForm"><div id="budgetInputs" class="budget-inputs"></div>
+        <div class="modal-actions"><button type="button" class="button button-ghost" id="cancelBudgetModal">Cancel</button><button type="submit" class="button button-primary">Save budgets</button></div>
+      </form>
+    </section>
+  </div>
+
+  <div class="toast hidden" id="toast" role="status"></div>
+  <script src="script.js"></script>
+</body>
+</html>
